@@ -86,16 +86,16 @@ UI Framework: Font Awesome ikonları
 
 ## 4. PROJE YAPISI
 banka/
-├── templates/              # HTML şablonları
-├── static/                # Statik dosyalar (CSS, JS)
-├── app.py                # Flask web sunucusu
-├── main.py               # Konsol uygulaması
-├── kur_bilgileri.py      # Döviz işlemleri
-├── musteri_islemleri.py  # Müşteri yönetimi
-├── admin_panel.py        # Yönetici paneli
-├── musteriler.json       # Müşteri veritabanı
-├── hesaplar.json        # Hesap veritabanı
-└── islem_gecmisi.json   # İşlem kayıtları
+├── templates/ #HTML şablonları
+├── static/ # Statik dosyalar (CSS, JS)
+├── app.py # Flask web sunucusu
+├── main.py # Konsol uygulaması
+├── kur_bilgileri.py # Döviz işlemleri
+├── musteri_islemleri.py # Müşteri yönetimi
+├── admin_panel.py # Yönetici paneli
+├── musteriler.json # Müşteri veritabanı
+├── hesaplar.json # Hesap veritabanı
+└── islem_gecmisi.json # İşlem kayıtları
 
 ## 5. TEMEL ÖZELLİKLER
     5.1 Para İşlemleri
