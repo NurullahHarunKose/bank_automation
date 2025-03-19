@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Yönetici Paneli</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <a href="{{ url_for('index') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Ana Sayfaya Dön</span>
+            </a>
+            <h1>👨‍💼 YÖNETİCİ PANELİ</h1>
+        </div>
+        
+        <div class="content-box">
+            <div class="panel-header">
+                <h2><i class="fas fa-users"></i> Müşteri Listesi</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="musteriAra" placeholder="Müşteri ara..." onkeyup="musteriFiltrele()">
+                </div>
+            </div>
+            
+            <div class="musteri-list">
+                {% for musteri in musteriler %}
+                <div class="musteri-card" onclick="musteri_detay('{{ musteri.hesap_no }}')">
+                    <div class="musteri-info">
+                        <div class="hesap-no">
+                            <i class="fas fa-hashtag"></i>
+                            {{ musteri.hesap_no }}
+                        </div>
+                        <div class="musteri-name">
+                            <i class="fas fa-user"></i>
+                            {{ musteri.ad }} {{ musteri.soyad }}
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Müşteri Detay Modal -->
+    <div id="musteriModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <h2><i class="fas fa-user"></i> <span id="modalMusteriAdi"></span></h2>
+                    <div class="modal-subtitle">Hesap No: <span id="modalHesapNo"></span></div>
+                </div>
+                <span class="close" onclick="modalKapat()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="tabDegistir('hesapBilgileri')">
+                        <i class="fas fa-info-circle"></i> Hesap Bilgileri
+                    </button>
+                    <button class="tab-btn" onclick="tabDegistir('islemGecmisi')">
+                        <i class="fas fa-history"></i> İşlem Geçmişi
+                    </button>
+                    <button class="tab-btn" onclick="tabDegistir('bakiyeDetay')">
+                        <i class="fas fa-wallet"></i> Bakiye Detayları
+                    </button>
+                </div>
+                <div id="musteriDetay"></div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            width: 300px;
+        }
+
+        .search-box i {
+            color: #666;
+            margin-right: 10px;
+        }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .musteri-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .musteri-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .musteri-card:hover {
+            transform: translateX(5px);
+            background: #f8f9fa;
+            border-color: #0088cc;
+        }
+
+        .musteri-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .hesap-no, .musteri-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .hesap-no {
+            color: #0088cc;
+            font-weight: 500;
+        }
+
+        .musteri-name {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .musteri-card i.fa-chevron-right {
+            color: #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .musteri-card:hover i.fa-chevron-right {
+            color: #0088cc;
+            transform: translateX(5px);
+        }
+
+        /* Modal Stilleri */
+        .modal-content {
+            width: 80%;
+            max-width: 1000px;
+            margin: 5% auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #0088cc;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .bilgi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .bilgi-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .bilgi-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .bilgi-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .bilgi-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .bakiye-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .bakiye-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .bakiye-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .bakiye-card i {
+            font-size: 24px;
+            padding: 12px;
+            border-radius: 50%;
+            background: #f8f9fa;
+        }
+
+        .bakiye-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .bakiye-info span {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .bakiye-info strong {
+            color: #333;
+            font-size: 18px;
+        }
+
+        .islem-listesi {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .islem-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .islem-card:hover {
+            transform: translateX(5px);
+            background: #f8f9fa;
+        }
+
+        .islem-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e3f2fd;
+            border-radius: 50%;
+            color: #0066cc;
+        }
+
+        .islem-detay {
+            flex: 1;
+        }
+
+        .islem-baslik {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .islem-miktar {
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        .islem-tarih {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .islem-aciklama {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .no-islem {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        i.gold { color: #ffc107; }
+        i.silver { color: #adb5bd; }
+
+        @media (max-width: 768px) {
+            .bilgi-grid, .bakiye-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .islem-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .islem-icon {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Bakiye detayları için yeni stiller */
+        .bakiye-ozet {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bakiye-ozet-baslik {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #2d3748;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .bakiye-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .bakiye-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bakiye-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #0066cc, #0088cc);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bakiye-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .bakiye-card:hover::before {
+            opacity: 1;
+        }
+
+        .bakiye-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .bakiye-icon i {
+            font-size: 24px;
+        }
+
+        .bakiye-detay {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bakiye-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .bakiye-amount {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .bakiye-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* Para birimi özel stilleri */
+        .tl-card .bakiye-icon {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .usd-card .bakiye-icon {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .eur-card .bakiye-icon {
+            background: #ede7f6;
+            color: #5e35b1;
+        }
+
+        .gold-card .bakiye-icon {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .silver-card .bakiye-icon {
+            background: #f5f5f5;
+            color: #757575;
+        }
+
+        /* Toplam varlık kartı */
+        .toplam-varlik {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #0066cc 0%, #0088cc 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .toplam-varlik-baslik {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .toplam-varlik-miktar {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .toplam-varlik-detay {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .bakiye-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bakiye-card {
+                padding: 20px;
+            }
+            
+            .toplam-varlik-miktar {
+                font-size: 28px;
+            }
+        }
+
+        /* Modal için yeni scroll stilleri */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow-y: auto; /* Dikey scroll ekle */
+            padding: 20px; /* İçerikle kenar arasında boşluk bırak */
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 20px auto; /* Üst ve alttan margin ekle */
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative; /* Position relative ekle */
+        }
+
+        .modal-body {
+            max-height: 70vh; /* Maksimum yükseklik belirle */
+            overflow-y: auto; /* Modal body'ye scroll ekle */
+            padding: 20px;
+            scrollbar-width: thin; /* Firefox için ince scrollbar */
+            scrollbar-color: #0088cc #f0f0f0; /* Firefox için scrollbar rengi */
+        }
+
+        /* Webkit (Chrome, Safari, Edge) için scrollbar stilleri */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #0088cc;
+            border-radius: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #006699;
+        }
+
+        /* Tab içeriklerinin scroll davranışını düzelt */
+        .tab-content {
+            display: none;
+            overflow-x: hidden; /* Yatay scroll'u engelle */
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive düzenlemeler */
+        @media (max-width: 768px) {
+            .modal {
+                padding: 10px;
+            }
+            
+            .modal-content {
+                margin: 10px auto;
+                width: 95%;
+            }
+            
+            .modal-body {
+                max-height: 80vh;
+            }
+        }
+
+        .modal-title {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            opacity: 0.8;
+            color: #e0e0e0;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #0066cc 0%, #0088cc 100%);
+            padding: 25px;
+            border-radius: 15px 15px 0 0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+    </style>
+
+    <script>
+        function musteriFiltrele() {
+            const aramaMetni = document.getElementById('musteriAra').value.toLowerCase();
+            const musteriKartlari = document.querySelectorAll('.musteri-card');
+            
+            musteriKartlari.forEach(kart => {
+                const isim = kart.querySelector('.musteri-name').textContent.toLowerCase();
+                const hesapNo = kart.querySelector('.hesap-no').textContent.toLowerCase();
+                
+                if (isim.includes(aramaMetni) || hesapNo.includes(aramaMetni)) {
+                    kart.style.display = 'flex';
+                } else {
+                    kart.style.display = 'none';
+                }
+            });
+        }
+
+        function musteri_detay(hesapNo) {
+            fetch(`/musteri-detay/${hesapNo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        // Modal başlığını güncelle
+                        document.getElementById('modalMusteriAdi').textContent = 
+                            `${data.musteri.ad} ${data.musteri.soyad}`;
+                        document.getElementById('modalHesapNo').textContent = 
+                            data.musteri.hesap_no;
+                        
+                        document.getElementById('musteriDetay').innerHTML = musteriDetayHTML(data);
+                        document.getElementById('musteriModal').style.display = 'block';
+                        tabDegistir('hesapBilgileri');
+                    }
+                });
+        }
+
+        function musteriDetayHTML(data) {
+            const musteri = data.musteri;
+            const hesap = data.hesap;
+            const islemler = data.islemler;
+            
+            // TL cinsinden toplam varlık hesaplama
+            const tlBakiye = parseFloat(hesap.bakiye_tl);
+            const usdBakiye = parseFloat(hesap.bakiye_usd) * 31.50; // Örnek kur
+            const eurBakiye = parseFloat(hesap.bakiye_eur) * 34.20; // Örnek kur
+            const altinBakiye = parseFloat(hesap.bakiye_altin) * 2450; // Örnek kur
+            const gumusBakiye = parseFloat(hesap.bakiye_gumus) * 30; // Örnek kur
+            const toplamVarlik = tlBakiye + usdBakiye + eurBakiye + altinBakiye + gumusBakiye;
+            
+            return `
+                <div id="hesapBilgileri" class="tab-content active">
+                    <div class="musteri-bilgiler">
+                        <div class="bilgi-grid">
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">Ad Soyad</div>
+                                <div class="bilgi-value">${musteri.ad} ${musteri.soyad}</div>
+                            </div>
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">TC No</div>
+                                <div class="bilgi-value">${musteri.tc_no}</div>
+                            </div>
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">Doğum Tarihi</div>
+                                <div class="bilgi-value">${musteri.dogum_tarihi}</div>
+                            </div>
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">E-posta</div>
+                                <div class="bilgi-value">${musteri.email}</div>
+                            </div>
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">Telefon</div>
+                                <div class="bilgi-value">${musteri.telefon}</div>
+                            </div>
+                            <div class="bilgi-item">
+                                <div class="bilgi-label">Hesap No</div>
+                                <div class="bilgi-value">${musteri.hesap_no}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="bakiyeDetay" class="tab-content">
+                    <div class="bakiye-ozet">
+                        <div class="toplam-varlik">
+                            <div class="toplam-varlik-baslik">
+                                <i class="fas fa-chart-pie"></i>
+                                Toplam Varlık Değeri
+                            </div>
+                            <div class="toplam-varlik-miktar">
+                                ${toplamVarlik.toLocaleString('tr-TR')} ₺
+                            </div>
+                            <div class="toplam-varlik-detay">
+                                Tüm varlıkların güncel TL karşılığı
+                            </div>
+                        </div>
+                        
+                        <div class="bakiye-grid">
+                            <div class="bakiye-card tl-card">
+                                <div class="bakiye-icon">
+                                    <i class="fas fa-lira-sign"></i>
+                                </div>
+                                <div class="bakiye-detay">
+                                    <span class="bakiye-label">Türk Lirası</span>
+                                    <span class="bakiye-amount">${parseFloat(hesap.bakiye_tl).toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bakiye-card usd-card">
+                                <div class="bakiye-icon">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="bakiye-detay">
+                                    <span class="bakiye-label">Amerikan Doları</span>
+                                    <span class="bakiye-amount">${parseFloat(hesap.bakiye_usd).toLocaleString('tr-TR')} $</span>
+                                    <span class="bakiye-trend">≈ ${usdBakiye.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bakiye-card eur-card">
+                                <div class="bakiye-icon">
+                                    <i class="fas fa-euro-sign"></i>
+                                </div>
+                                <div class="bakiye-detay">
+                                    <span class="bakiye-label">Euro</span>
+                                    <span class="bakiye-amount">${parseFloat(hesap.bakiye_eur).toLocaleString('tr-TR')} €</span>
+                                    <span class="bakiye-trend">≈ ${eurBakiye.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bakiye-card gold-card">
+                                <div class="bakiye-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="bakiye-detay">
+                                    <span class="bakiye-label">Altın</span>
+                                    <span class="bakiye-amount">${parseFloat(hesap.bakiye_altin).toLocaleString('tr-TR')} gr</span>
+                                    <span class="bakiye-trend">≈ ${altinBakiye.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bakiye-card silver-card">
+                                <div class="bakiye-icon">
+                                    <i class="fas fa-coins"></i>
+                                </div>
+                                <div class="bakiye-detay">
+                                    <span class="bakiye-label">Gümüş</span>
+                                    <span class="bakiye-amount">${parseFloat(hesap.bakiye_gumus).toLocaleString('tr-TR')} gr</span>
+                                    <span class="bakiye-trend">≈ ${gumusBakiye.toLocaleString('tr-TR')} ₺</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="islemGecmisi" class="tab-content">
+                    <div class="islem-listesi">
+                        ${islemler.length > 0 ? islemler.map(islem => `
+                            <div class="islem-card">
+                                <div class="islem-icon">
+                                    <i class="fas ${getIslemIcon(islem.islem_tipi)}"></i>
+                                </div>
+                                <div class="islem-detay">
+                                    <div class="islem-baslik">${islem.islem_tipi}</div>
+                                    <div class="islem-miktar">${islem.miktar} ${islem.birim}</div>
+                                    <div class="islem-tarih">${islem.tarih}</div>
+                                    ${islem.aciklama ? `<div class="islem-aciklama">${islem.aciklama}</div>` : ''}
+                                </div>
+                            </div>
+                        `).join('') : '<div class="no-islem">İşlem geçmişi bulunamadı</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getIslemIcon(islemTipi) {
+            if (islemTipi.includes('Transfer')) return 'fa-exchange-alt';
+            if (islemTipi.includes('Alış')) return 'fa-arrow-down';
+            if (islemTipi.includes('Satış')) return 'fa-arrow-up';
+            return 'fa-history';
+        }
+
+        function tabDegistir(tabId) {
+            // Tüm tab butonlarını ve içerikleri pasif yap
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Seçilen tabı aktif yap
+            document.querySelector(`.tab-btn[onclick="tabDegistir('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Modal dışına tıklandığında kapatma
+        window.onclick = function(event) {
+            const modal = document.getElementById('musteriModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

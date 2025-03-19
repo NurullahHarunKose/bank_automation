@@ -1,0 +1,44 @@
+{
+    "hesaplar": [
+        {
+            "hesap_no": "1000",
+            "bakiye_tl": "23751.619732",
+            "bakiye_usd": "1520",
+            "bakiye_eur": "95.0",
+            "bakiye_altin": "11.01",
+            "bakiye_gumus": "264.0"
+        },
+        {
+            "hesap_no": "1001",
+            "bakiye_tl": "7670.0",
+            "bakiye_usd": "157",
+            "bakiye_eur": "1667.0",
+            "bakiye_altin": "258",
+            "bakiye_gumus": "548"
+        },
+        {
+            "hesap_no": "1002",
+            "bakiye_tl": "6375.0",
+            "bakiye_usd": "154",
+            "bakiye_eur": "521",
+            "bakiye_altin": "54",
+            "bakiye_gumus": "583"
+        },
+        {
+            "hesap_no": "1003",
+            "bakiye_tl": "1587",
+            "bakiye_usd": "159",
+            "bakiye_eur": "123",
+            "bakiye_altin": "75.0",
+            "bakiye_gumus": "1587"
+        },
+        {
+            "hesap_no": "1004",
+            "bakiye_tl": "1554",
+            "bakiye_usd": "154",
+            "bakiye_eur": "152",
+            "bakiye_altin": "156",
+            "bakiye_gumus": "1582"
+        }
+    ]
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Yeni Müşteri Kaydı - Banka Sistemi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-user-plus bank-icon"></i>
+                <h1>Yeni Müşteri Kaydı</h1>
+            </div>
+            <form method="POST" action="{{ url_for('yeni_musteri_kayit') }}">
+                <!-- Ad ve soyad ayrı ayrı kutularda -->
+                <div class="form-group">
+                    <label for="ad">
+                        <i class="fas fa-user"></i>
+                        Ad:
+                    </label>
+                    <input type="text" id="ad" name="ad" required placeholder="Adınızı giriniz">
+                </div>
+
+                <div class="form-group">
+                    <label for="soyad">
+                        <i class="fas fa-user"></i>
+                        Soyad:
+                    </label>
+                    <input type="text" id="soyad" name="soyad" required placeholder="Soyadınızı giriniz">
+                </div>
+
+                <!-- Diğer form alanları -->
+                <div class="form-group">
+                    <label for="tc_no">
+                        <i class="fas fa-id-card"></i>
+                        TC Kimlik No:
+                    </label>
+                    <input type="text" id="tc_no" name="tc_no" required maxlength="11" pattern="[0-9]{11}" placeholder="11 haneli TC Kimlik No">
+                </div>
+                
+                <div class="form-group">
+                    <label for="dogum_tarihi">
+                        <i class="fas fa-calendar"></i>
+                        Doğum Tarihi:
+                    </label>
+                    <input type="date" id="dogum_tarihi" name="dogum_tarihi" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sifre">
+                        <i class="fas fa-lock"></i>
+                        Şifre:
+                    </label>
+                    <input type="password" id="sifre" name="sifre" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefon">
+                        <i class="fas fa-phone"></i>
+                        Telefon:
+                    </label>
+                    <input type="tel" id="telefon" name="telefon" required pattern="[0-9]{10}" placeholder="5XX XXX XXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">
+                        <i class="fas fa-envelope"></i>
+                        E-posta Adresi:
+                    </label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adres">
+                        <i class="fas fa-home"></i>
+                        İkametgah Adresi:
+                    </label>
+                    <textarea id="adres" name="adres" required rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="login-button">
+                    <i class="fas fa-user-plus"></i>
+                    Kayıt Ol
+                </button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <div class="nav-links">
+                <a href="/" class="musteri-link"><i class="fas fa-home"></i> Ana Sayfa</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+{
+    "islemler": [
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:43:17",
+            "islem_tipi": "Para Transferi",
+            "miktar": 78.0,
+            "birim": "EUR",
+            "aciklama": "Doğum günün kutlu olsun :):)",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:43:48",
+            "islem_tipi": "Para Transferi",
+            "miktar": 1500.0,
+            "birim": "TL",
+            "aciklama": "Şubat ayı ev kirası.",
+            "karsi_hesap": "1002"
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:44:27",
+            "islem_tipi": "Para Transferi",
+            "miktar": 21.0,
+            "birim": "ALTIN",
+            "aciklama": "Geçen ay aldığım borcun ödemesi",
+            "karsi_hesap": "1003"
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:46:44",
+            "islem_tipi": "Döviz İşlemi (ALIS)",
+            "miktar": 15.0,
+            "birim": "EUR",
+            "aciklama": "15.0 EUR Alış",
+            "kur": 39.8189
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:46:57",
+            "islem_tipi": "Döviz İşlemi (SATIS)",
+            "miktar": 10.0,
+            "birim": "ALTIN",
+            "aciklama": "10.0 ALTIN Satış",
+            "kur": 2270.0445
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "12/03/2025 01:47:17",
+            "islem_tipi": "Döviz İşlemi (ALIS)",
+            "miktar": 54.0,
+            "birim": "GUMUS",
+            "aciklama": "54.0 GUMUS Alış",
+            "kur": 29.6911
+        },
+        {
+            "hesap_no": "1001",
+            "tarih": "12/03/2025 01:43:17",
+            "islem_tipi": "Para Transferi",
+            "miktar": 78.0,
+            "birim": "EUR",
+            "aciklama": "Doğum günün kutlu olsun :):)",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1002",
+            "tarih": "12/03/2025 01:43:17",
+            "islem_tipi": "Para Transferi",
+            "miktar": 78.0,
+            "birim": "EUR",
+            "aciklama": "Doğum günün kutlu olsun :):)",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1003",
+            "tarih": "12/03/2025 01:43:17",
+            "islem_tipi": "Para Transferi",
+            "miktar": 78.0,
+            "birim": "EUR",
+            "aciklama": "Doğum günün kutlu olsun :):)",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1004",
+            "tarih": "12/03/2025 01:43:17",
+            "islem_tipi": "Para Transferi",
+            "miktar": 78.0,
+            "birim": "EUR",
+            "aciklama": "Doğum günün kutlu olsun :):)",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "18/03/2025 14:52:39",
+            "islem_tipi": "Para Transferi",
+            "miktar": 100.0,
+            "birim": "TL",
+            "aciklama": "gh",
+            "karsi_hesap": "1001"
+        },
+        {
+            "hesap_no": "1000",
+            "tarih": "18/03/2025 14:55:17",
+            "islem_tipi": "Döviz İşlemi (ALIS)",
+            "miktar": 0.01,
+            "birim": "ALTIN",
+            "aciklama": "0.01 ALTIN Alış",
+            "kur": 2322.2368
+        }
+    ]
+}

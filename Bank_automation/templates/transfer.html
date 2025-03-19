@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Para Transferi</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        <span>Geri Dön</span>
+      </a>
+      <h1>PARA TRANSFERİ</h1>
+    </div>
+
+    <div class="content-box">
+      <!-- Bakiye kartları bölümü -->
+      <div class="balance-grid">
+        <!-- TL Kart -->
+        <div class="bakiye-bilgi tl-card">
+            <i class="fas fa-lira-sign currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Türk Lirası</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.tl) }} ₺</span>
+            </div>
+        </div>
+
+        <!-- USD Kart -->
+        <div class="bakiye-bilgi usd-card">
+            <i class="fas fa-dollar-sign currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Amerikan Doları</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.usd) }} $</span>
+            </div>
+        </div>
+
+        <!-- EUR Kart -->
+        <div class="bakiye-bilgi eur-card">
+            <i class="fas fa-euro-sign currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Euro</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.eur) }} €</span>
+            </div>
+        </div>
+
+        <!-- Altın Kart -->
+        <div class="bakiye-bilgi gold-card">
+            <i class="fas fa-coins currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Altın</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.altin) }} gr</span>
+            </div>
+        </div>
+
+        <!-- Gümüş Kart -->
+        <div class="bakiye-bilgi silver-card">
+            <i class="fas fa-coins currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Gümüş</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.gumus) }} gr</span>
+            </div>
+        </div>
+
+        <!-- Tüm Varlıklarım Kartı -->
+        <div class="bakiye-bilgi total-assets-card">
+            <i class="fas fa-wallet currency-icon"></i>
+            <div class="bakiye-detay">
+                <span class="bakiye-label">Tüm Varlıklarım</span>
+                <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.tl + (bakiyeler.usd * 31.50) + (bakiyeler.eur * 34.15) + (bakiyeler.altin * 2150) + (bakiyeler.gumus * 25.75)) }} ₺</span>
+            </div>
+        </div>
+      </div>
+
+      <form id="transferForm" method="POST" class="transfer-form" onsubmit="return onayDialog(event)">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> Alıcı Hesap No:</label>
+          <input type="text" name="alici_hesap_no" id="alici_hesap_no" required placeholder="Alıcı hesap numarasını girin" pattern="[0-9]{4}" minlength="4" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4)" onchange="checkHesapNo(this.value)">
+          <div id="alici_bilgisi" class="alici-bilgisi" style="display: none;"></div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-money-bill-transfer"></i> Transfer Türü:</label>
+          <select name="transfer_turu" id="transfer_turu" required>
+            <option value="">Transfer türü seçin...</option>
+            <option value="tl">Türk Lirası (TL)</option>
+            <option value="usd">Amerikan Doları (USD)</option>
+            <option value="eur">Euro (EUR)</option>
+            <option value="altin">Altın (gr)</option>
+            <option value="gumus">Gümüş (gr)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-calculator"></i> Transfer Miktarı:</label>
+          <input type="number" name="miktar" id="miktar" step="0.01" required placeholder="Transfer miktarını girin">
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-comment"></i> Açıklama:</label>
+          <textarea name="aciklama" placeholder="Transfer açıklaması..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-paper-plane"></i> Transfer Yap
+        </button>
+
+        <!-- Onay kutucuğu buraya taşındı -->
+        <div class="modal" id="confirmModal">
+            <div class="modal-box">
+                <h2>Transfer Onayı</h2>
+                <p>Transfer detaylarını onaylıyor musunuz?</p>
+                <div class="transaction-details"></div>
+                <div class="modal-actions">
+                    <button type="button" onclick="cancelTransfer()" class="btn-secondary">İptal</button>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-check"></i> Onayla
+                    </button>
+                </div>
+            </div>
+        </div>
+
+      </form>
+
+      <!-- Onay Modal -->
+      <div id="onayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-transfer"></i> Transfer Onayı</h2>
+                <span class="close" onclick="iptalTransfer()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="onay-detaylari">
+                    <p>Aşağıdaki transfer işlemini onaylıyor musunuz?</p>
+                    <div class="detay-item">
+                        <span class="label"><i class="fas fa-money-bill"></i> Gönderilen:</span>
+                        <span id="miktarOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item">
+                        <span class="label"><i class="fas fa-user"></i> Alıcı:</span>
+                        <span id="aliciOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item bakiye">
+                        <span class="label"><i class="fas fa-wallet"></i> İşlem Sonrası Bakiye:</span>
+                        <span id="bakiyeOnay" class="value"></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="iptalTransfer()" class="btn-red">
+                        <i class="fas fa-times"></i> İptal
+                    </button>
+                    <button onclick="onayla()" class="btn-green">
+                        <i class="fas fa-check"></i> Onayla
+                    </button>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            {% if category == 'error' %}  <!-- Sadece hata mesajlarını göster -->
+            <div class="alert alert-{{ category }}" style="white-space: pre-line;">
+              {{ message }}
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <script>
+    let typingTimer;
+    const doneTypingInterval = 500;
+
+    function checkHesapNo(hesapNo) {
+        // Girişi temizle ve sayı olmayan karakterleri kaldır
+        hesapNo = hesapNo.replace(/[^0-9]/g, '');
+        
+        // Mevcut kontrolleri temizle
+        clearTimeout(typingTimer);
+        const aliciBilgisi = document.getElementById('alici_bilgisi');
+        aliciBilgisi.style.display = 'none';
+        
+        // Hesap no kontrolü
+        if (hesapNo.length === 0) {
+            return;
+        }
+
+        // 4 haneli kontrol
+        if (hesapNo.length !== 4) {
+            aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Hesap no 4 haneli olmalıdır';
+            aliciBilgisi.className = 'alici-bilgisi error';
+            aliciBilgisi.style.display = 'flex';
+            return;
+        }
+        
+        // Kendi hesabına transfer kontrolü
+        if (hesapNo === '{{ session["hesap_no"] }}') {
+            aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Kendinize transfer yapamazsınız';
+            aliciBilgisi.className = 'alici-bilgisi error';
+            aliciBilgisi.style.display = 'flex';
+            return;
+        }
+
+        // Alıcı bilgilerini kontrol et
+        typingTimer = setTimeout(() => {
+            fetch(`/get_musteri_bilgisi/${hesapNo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Alıcı bulundu
+                        aliciBilgisi.innerHTML = `<i class="fas fa-check-circle"></i> Alıcı: ${data.ad} ${data.soyad}`;
+                        aliciBilgisi.className = 'alici-bilgisi success';
+                    } else {
+                        // Alıcı bulunamadı
+                        aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Geçersiz hesap numarası';
+                        aliciBilgisi.className = 'alici-bilgisi error';
+                    }
+                    aliciBilgisi.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Hata:', error);
+                    aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Hesap bilgileri kontrol edilemiyor';
+                    aliciBilgisi.className = 'alici-bilgisi error';
+                    aliciBilgisi.style.display = 'flex';
+                });
+        }, doneTypingInterval);
+    }
+
+    // Form gönderilmeden önce son kontrol
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const hesapNo = document.getElementById('alici_hesap_no').value;
+        const aliciBilgisi = document.getElementById('alici_bilgisi');
+        
+        if (hesapNo.length !== 4) {
+            e.preventDefault();
+            aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Geçerli bir hesap numarası giriniz';
+            aliciBilgisi.className = 'alici-bilgisi error';
+            aliciBilgisi.style.display = 'flex';
+            return false;
+        }
+        
+        if (hesapNo === '{{ session["hesap_no"] }}') {
+            e.preventDefault();
+            aliciBilgisi.innerHTML = '<i class="fas fa-exclamation-circle"></i> Kendinize transfer yapamazsınız';
+            aliciBilgisi.className = 'alici-bilgisi error';
+            aliciBilgisi.style.display = 'flex';
+            return false;
+        }
+    });
+
+    function onayDialog(event) {
+        event.preventDefault();
+        const form = document.getElementById('transferForm');
+        const aliciHesapNo = document.getElementById('alici_hesap_no').value;
+        const aliciBilgisi = document.getElementById('alici_bilgisi');
+        const miktar = document.getElementById('miktar').value;
+        const transferTuru = document.getElementById('transfer_turu').value;
+
+        // Önce alıcı bilgilerini kontrol et
+        fetch(`/get_musteri_bilgisi/${aliciHesapNo}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const mevcutBakiye = {{ bakiyeler|tojson }}[transferTuru] || 0;
+                    const yeniBakiye = mevcutBakiye - parseFloat(miktar);
+                    
+                    // Bakiye kontrolü
+                    if (parseFloat(miktar) > mevcutBakiye) {
+                        alert('Yetersiz bakiye!');
+                        return;
+                    }
+
+                    // Onay modalını doldur
+                    document.getElementById('aliciOnay').innerText = `${data.ad} ${data.soyad}`;
+                    document.getElementById('miktarOnay').innerText = `${miktar} ${transferTuru.toUpperCase()}`;
+                    document.getElementById('bakiyeOnay').innerText = `${yeniBakiye.toFixed(2)} ${transferTuru.toUpperCase()}`;
+
+                    // Modalı göster
+                    const modal = document.getElementById('onayModal');
+                    modal.style.display = "block";
+                } else {
+                    alert('Geçersiz alıcı hesap numarası!');
+                }
+            });
+        
+        return false;
+    }
+
+    function iptalTransfer() {
+        const modal = document.getElementById('onayModal');
+        modal.style.display = "none";
+    }
+
+    function onayla() {
+        document.getElementById('transferForm').submit();
+    }
+  </script>
+
+  <style>
+    .notification-btn {
+        flex: 1;
+    }
+
+    .notification-content {
+        text-align: center;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .notification-btn {
+        flex: 1;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .notification-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .notification-details {
+        background: rgba(16, 185, 129, 0.1);
+        padding: 20px;
+        border-radius: 12px;
+        margin: 20px 0;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .bakiye-info {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .notification-icon {
+        font-size: 48px;
+        color: #10B981;
+        margin-bottom: 15px;
+    }
+
+    .onay-flex-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .onay-bilgi {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        background: #f8fafd;
+        border-radius: 10px;
+    }
+
+    .onay-icon-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .onay-icon-label i {
+        font-size: 24px;
+        color: #0066cc;
+    }
+
+    .onay-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .onay-flex-container {
+            flex-direction: column;
+        }
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        overflow: hidden;  /* Önemli: Header'ın dışarı taşmasını önler */
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .modal-header h2 i {
+        font-size: 1.6rem;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .close {
+        color: rgba(255,255,255,0.8);
+        font-size: 24px;
+        font-weight: 400;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .close:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .islem-detaylari {
+        background: white;  /* Arka plan rengini beyaz yap */
+        border-radius: 0;  /* Üst köşeleri düz yap */
+        margin-top: 0;     /* Üst boşluğu kaldır */
+    }
+
+    .close {
+        position: relative;  /* Absolute yerine relative kullan */
+        right: 0;
+        top: 0;
+        color: white;
+        cursor: pointer;
+        font-size: 24px;
+    }
+
+    .islem-detaylari {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .islem-detay {
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .detay-label {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .detay-value {
+        color: #333;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .islem-detay.bakiye {
+        background: #e8f4fd;
+        border: 1px solid #cce5ff;
+    }
+
+    .islem-detay.bakiye .detay-value {
+        color: #0066cc;
+    }
+
+    .modal-footer {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-secondary, .btn-primary {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-primary {
+        background: #28a745;
+        color: white;
+    }
+
+    .btn-secondary:hover, .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            margin: 10% auto;
+            width: 95%;
+        }
+    }
+
+    /* Bakiye grid stil güncellemeleri */
+    .balance-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+        padding: 20px;
+    }
+
+    .bakiye-bilgi {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        height: 100%;
+    }
+
+    .bakiye-bilgi:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Responsive düzenleme */
+    @media (max-width: 768px) {
+        .balance-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+        }
+    }
+
+    /* Modal stil değişiklikleri */
+    .modal {
+        position: fixed;
+        top: 20%; /* Yukarı taşımak için değiştirildi (önceden 50% idi) */
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 1000;
+        display: none;
+    }
+
+    .modal-box {
+        position: relative; /* absolute yerine relative yapıldı */
+        margin: 0 auto; /* Ortalamak için */
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    /* Modal stilleri güncellendi */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Arkaplan karartma oranı arttırıldı */
+        overflow: auto;
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 10vh auto; /* Yukarıdan mesafe azaltıldı */
+        padding: 0;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 15px;
+        position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {transform: translateY(-100px); opacity: 0;}
+        to {transform: translateY(0); opacity: 1;}
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #0066cc, #0088cc);
+        color: white;
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .onay-detaylari {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .detay-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .detay-item:last-child {
+        border-bottom: none;
+    }
+
+    .detay-item.bakiye {
+        background: #e8f4fd;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .label {
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-red, .btn-green {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        color: white;
+    }
+
+    .btn-red {
+        background: #dc3545;
+    }
+
+    .btn-green {
+        background: #28a745;
+    }
+
+    .btn-red:hover, .btn-green:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .close {
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0 10px;
+    }
+
+    .close:hover {
+        color: #f8f9fa;
+    }
+  </style>
+</body>
+</html>

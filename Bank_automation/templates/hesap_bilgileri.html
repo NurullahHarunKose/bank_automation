@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hesap Bilgileri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .back-button {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #0066cc;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-top: 2px solid #e0e0e0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .balance-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .balance-row:hover {
+            transform: translateX(10px);
+            background: #e9ecef;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+            width: 150px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-separator {
+            color: #0066cc;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+            font-size: 18px;
+        }
+
+        .currency-icon {
+            font-size: 20px;
+        }
+
+        .tl-icon { color: #198754; }
+        .usd-icon { color: #0d6efd; }
+        .eur-icon { color: #6610f2; }
+        .gold-icon { color: #ffc107; }
+        .silver-icon { color: #adb5bd; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .balance-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-separator {
+                display: none;
+            }
+
+            .info-label {
+                color: #0066cc;
+            }
+        }
+        
+        .total-asset-card {
+            background: linear-gradient(135deg, #0066cc 0%, #0088cc 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .asset-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .asset-header i {
+            font-size: 24px;
+        }
+
+        .asset-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .asset-amount {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .asset-amount .amount {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .asset-amount .detail {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .tl-equivalent {
+            font-size: 14px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .balance-row {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .balance-row:hover {
+            transform: translateX(10px);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Ana Menüye Dön</span>
+            </a>
+            <h1>HESAP BİLGİLERİ</h1>
+        </div>
+
+        <div class="info-section">
+            <!-- Toplam Varlık Kartı -->
+            <div class="total-asset-card">
+                <div class="asset-header">
+                    <i class="fas fa-chart-pie"></i>
+                    <h2>Toplam Varlık Değeri</h2>
+                </div>
+                <div class="asset-amount">
+                    {% set tl = hesap.bakiye_tl|float %}
+                    {% set usd = hesap.bakiye_usd|float * 31.50 %} {# Örnek USD/TL kuru #}
+                    {% set eur = hesap.bakiye_eur|float * 34.20 %} {# Örnek EUR/TL kuru #}
+                    {% set altin = hesap.bakiye_altin|float * 2450 %} {# Örnek Altın/TL kuru #}
+                    {% set gumus = hesap.bakiye_gumus|float * 30 %} {# Örnek Gümüş/TL kuru #}
+                    {% set total = tl + usd + eur + altin + gumus %}
+                    <span class="amount">{{ "%.2f"|format(total) }} ₺</span>
+                    <span class="detail">Tüm varlıklarınızın toplam TL karşılığı</span>
+                </div>
+            </div>
+
+            <!-- Bakiye Listesi -->
+            <div class="balance-list">
+                <div class="balance-row">
+                    <span class="info-label">
+                        <i class="fas fa-lira-sign currency-icon tl-icon"></i>
+                        Türk Lirası
+                    </span>
+                    <span class="info-separator">:</span>
+                    <span class="info-value">{{ "%.2f"|format(hesap.bakiye_tl|float) }} ₺</span>
+                </div>
+
+                <div class="balance-row">
+                    <span class="info-label">
+                        <i class="fas fa-dollar-sign currency-icon usd-icon"></i>
+                        Dolar
+                    </span>
+                    <span class="info-separator">:</span>
+                    <span class="info-value">
+                        {{ "%.2f"|format(hesap.bakiye_usd|float) }} $ 
+                        <span class="tl-equivalent">(≈ {{ "%.2f"|format(hesap.bakiye_usd|float * 31.50) }} ₺)</span>
+                    </span>
+                </div>
+
+                <div class="balance-row">
+                    <span class="info-label">
+                        <i class="fas fa-euro-sign currency-icon eur-icon"></i>
+                        Euro
+                    </span>
+                    <span class="info-separator">:</span>
+                    <span class="info-value">
+                        {{ "%.2f"|format(hesap.bakiye_eur|float) }} € 
+                        <span class="tl-equivalent">(≈ {{ "%.2f"|format(hesap.bakiye_eur|float * 34.20) }} ₺)</span>
+                    </span>
+                </div>
+
+                <div class="balance-row">
+                    <span class="info-label">
+                        <i class="fas fa-coins currency-icon gold-icon"></i>
+                        Altın
+                    </span>
+                    <span class="info-separator">:</span>
+                    <span class="info-value">
+                        {{ "%.2f"|format(hesap.bakiye_altin|float) }} gr 
+                        <span class="tl-equivalent">(≈ {{ "%.2f"|format(hesap.bakiye_altin|float * 2450) }} ₺)</span>
+                    </span>
+                </div>
+
+                <div class="balance-row">
+                    <span class="info-label">
+                        <i class="fas fa-coins currency-icon silver-icon"></i>
+                        Gümüş
+                    </span>
+                    <span class="info-separator">:</span>
+                    <span class="info-value">
+                        {{ "%.2f"|format(hesap.bakiye_gumus|float) }} gr
+                        <span class="tl-equivalent">(≈ {{ "%.2f"|format(hesap.bakiye_gumus|float * 30) }} ₺)</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Döviz İşlem Detayı</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{{ url_for('doviz_islem') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Geri Dön</span>
+            </a>
+            <h1>{{ "ALIS" if islem_turu == "alis" else "SATIS" }} İŞLEMİ</h1>
+        </div>
+
+        <div class="islem-ozet-tablo">
+            <!-- Bakiye Bilgileri -->
+            <div class="bakiye-grid">
+                <!-- TL Bakiye Kartı -->
+                <div class="bakiye-bilgi tl-card">
+                    <i class="fas fa-lira-sign currency-icon"></i>
+                    <div class="bakiye-detay">
+                        <span class="bakiye-label">TL Bakiye</span>
+                        <span class="bakiye-value">{{ "%.2f"|format(bakiyeler.tl) }} ₺</span>
+                    </div>
+                </div>
+
+                <!-- Döviz/Emtia Bakiye Kartı -->
+                <div class="bakiye-bilgi {{ birim.lower() }}-card">
+                    <i class="fas fa-{{ 'dollar-sign' if birim == 'USD' else 'euro-sign' if birim == 'EUR' else 'coins' }} currency-icon"></i>
+                    <div class="bakiye-detay">
+                        <span class="bakiye-label">{{ birim }} Bakiye</span>
+                        <span class="bakiye-value">{{ "%.2f"|format(bakiyeler[birim.lower()]) }} {{ birim }}</span>
+                    </div>
+                </div>
+
+                <!-- Kur Bilgisi Kartı -->
+                <div class="bakiye-bilgi kur-card">
+                    <i class="fas fa-chart-line currency-icon"></i>
+                    <div class="bakiye-detay">
+                        <span class="bakiye-label">{{ birim }} Kuru</span>
+                        <span class="bakiye-value">{{ "%.4f"|format(kurlar[birim]['satis' if islem_turu == 'alis' else 'alis']) }} ₺</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İşlem Formu -->
+            <form id="islemForm" method="POST" action="{{ url_for('doviz_islem_yap') }}" class="islem-form" onsubmit="return onayDialog(event)">
+                <input type="hidden" name="birim" value="{{ birim }}">
+                <input type="hidden" name="islem_turu" value="{{ islem_turu }}">
+                
+                <div class="input-sections">
+                    <!-- Döviz Input Grubu -->
+                    <div class="miktar-input-group">
+                        <input type="number" 
+                               name="miktar" 
+                               id="miktar" 
+                               step="0.01" 
+                               min="0.01" 
+                               required 
+                               oninput="hesaplaTLFromDoviz(this.value)"
+                               placeholder="{{ birim }} miktarı girin...">
+                        <span class="birim-suffix">{{ birim }}</span>
+                    </div>
+
+                    <!-- TL Input Grubu -->
+                    <div class="miktar-input-group">
+                        <input type="number" 
+                               id="miktar_tl" 
+                               step="0.01" 
+                               min="0.01" 
+                               oninput="hesaplaDovizFromTL(this.value)"
+                               placeholder="TL miktarı girin...">
+                        <span class="birim-suffix">TL</span>
+                    </div>
+                </div>
+
+                <div class="hesaplama-sonucu" id="hesaplamaSonucu" style="display: none;">
+                    <div class="hesaplama-baslik">
+                        <i class="fas fa-calculator"></i>
+                        <span>İşlem Özeti</span>
+                    </div>
+                    <div class="hesaplama-bilgiler">
+                        <div class="hesaplama-satir">
+                            <span class="bilgi-etiket">
+                                <i class="fas fa-exchange-alt"></i>
+                                İşlem
+                            </span>
+                            <span class="bilgi-deger">
+                                {{ birim }} {{ "Alış" if islem_turu == "alis" else "Satış" }}
+                            </span>
+                        </div>
+                        <div class="hesaplama-satir">
+                            <span class="bilgi-etiket">
+                                <i class="fas fa-coins"></i>
+                                Miktar
+                            </span>
+                            <span class="bilgi-deger" id="islemMiktar">0.00 {{ birim }}</span>
+                        </div>
+                        <div class="hesaplama-satir">
+                            <span class="bilgi-etiket">
+                                <i class="fas fa-chart-line"></i>
+                                Kur
+                            </span>
+                            <span class="bilgi-deger">
+                                {{ "%.4f"|format(kurlar[birim]['satis' if islem_turu == 'alis' else 'alis']) }} ₺
+                            </span>
+                        </div>
+                        <div class="hesaplama-satir total">
+                            <span class="bilgi-etiket">
+                                <i class="fas fa-lira-sign"></i>
+                                Toplam
+                            </span>
+                            <span class="bilgi-deger" id="islemTotal">0.00 ₺</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-check-circle"></i>
+                    İşlemi Onayla
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Onay Modal -->
+    <div id="onayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exchange-alt"></i> İşlem Onayı</h2>
+                <span class="close" onclick="iptalIslem()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="onay-detaylari">
+                    <p>Aşağıdaki işlemi onaylıyor musunuz?</p>
+                    <div class="detay-item">
+                        <span class="label"><i class="fas fa-coins"></i> İşlem:</span>
+                        <span id="islemTipiOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item">
+                        <span class="label"><i class="fas fa-money-bill"></i> Miktar:</span>
+                        <span id="miktarOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item">
+                        <span class="label"><i class="fas fa-exchange-alt"></i> Kur:</span>
+                        <span id="kurOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item bakiye">
+                        <span class="label"><i class="fas fa-wallet"></i> Toplam Tutar:</span>
+                        <span id="tutarOnay" class="value"></span>
+                    </div>
+                    <div class="detay-item bakiye">
+                        <span class="label"><i class="fas fa-wallet"></i> İşlem Sonrası Bakiye:</span>
+                        <span id="bakiyeOnay" class="value"></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button onclick="iptalIslem()" class="btn-red">
+                        <i class="fas fa-times"></i> İptal
+                    </button>
+                    <button onclick="onayla()" class="btn-green">
+                        <i class="fas fa-check"></i> Onayla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const kur = {{ kurlar[birim]['satis' if islem_turu == 'alis' else 'alis'] }};
+        const dovizInput = document.getElementById('miktar');
+        const tlInput = document.getElementById('miktar_tl');
+        
+        function hesaplaTLFromDoviz(dovizMiktar) {
+            if (dovizMiktar > 0) {
+                const total = dovizMiktar * kur;
+                tlInput.value = total.toFixed(2);
+                guncelleSonuc(dovizMiktar);
+            } else {
+                tlInput.value = '';
+                document.getElementById('hesaplamaSonucu').style.display = 'none';
+            }
+        }
+        
+        function hesaplaDovizFromTL(tlMiktar) {
+            if (tlMiktar > 0) {
+                const dovizMiktar = tlMiktar / kur;
+                dovizInput.value = dovizMiktar.toFixed(2);
+                guncelleSonuc(dovizMiktar);
+            } else {
+                dovizInput.value = '';
+                document.getElementById('hesaplamaSonucu').style.display = 'none';
+            }
+        }
+        
+        function guncelleSonuc(miktar) {
+            const hesaplamaSonucu = document.getElementById('hesaplamaSonucu');
+            const islemMiktar = document.getElementById('islemMiktar');
+            const islemTotal = document.getElementById('islemTotal');
+            
+            if (miktar > 0) {
+                const total = miktar * kur;
+                islemMiktar.textContent = `${parseFloat(miktar).toFixed(2)} {{ birim }}`;
+                islemTotal.textContent = `${total.toFixed(2)} ₺`;
+                hesaplamaSonucu.style.display = 'block';
+            } else {
+                hesaplamaSonucu.style.display = 'none';
+            }
+        }
+
+        function onayDialog(event) {
+            event.preventDefault();
+            const miktar = parseFloat(document.getElementById('miktar').value);
+            const islemTuru = '{{ islem_turu }}';
+            const birim = '{{ birim }}';
+            const kur = parseFloat('{{ kurlar[birim]["satis" if islem_turu == "alis" else "alis"] }}');
+            const mevcutBakiye = islemTuru === 'alis' ? 
+                parseFloat('{{ bakiyeler.tl }}') : 
+                parseFloat('{{ bakiyeler[birim.lower()] }}');
+            
+            // Bakiye kontrolü
+            if (islemTuru === 'alis') {
+                const toplamTutar = miktar * kur;
+                if (toplamTutar > mevcutBakiye) {
+                    alert('Yetersiz TL bakiye!');
+                    return false;
+                }
+            } else {
+                if (miktar > mevcutBakiye) {
+                    alert(`Yetersiz ${birim} bakiye!`);
+                    return false;
+                }
+            }
+
+            // Modal içeriğini doldur
+            document.getElementById('islemTipiOnay').innerText = `${birim} ${islemTuru.toUpperCase()}`;
+            document.getElementById('miktarOnay').innerText = `${miktar} ${birim}`;
+            document.getElementById('kurOnay').innerText = `${kur.toFixed(4)} TL`;
+            
+            const toplamTutar = miktar * kur;
+            document.getElementById('tutarOnay').innerText = `${toplamTutar.toFixed(2)} TL`;
+            
+            const yeniBakiye = islemTuru === 'alis' ? 
+                mevcutBakiye - toplamTutar : 
+                mevcutBakiye - miktar;
+            document.getElementById('bakiyeOnay').innerText = `${yeniBakiye.toFixed(2)} ${islemTuru === 'alis' ? 'TL' : birim}`;
+
+            // Modalı göster
+            document.getElementById('onayModal').style.display = 'block';
+            return false;
+        }
+
+        function iptalIslem() {
+            document.getElementById('onayModal').style.display = 'none';
+        }
+
+        function onayla() {
+            document.getElementById('islemForm').submit();
+        }
+    </script>
+
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(17, 24, 39, 0.8);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            background: #ffffff;
+            margin: 5vh auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalSlideUp 0.4s ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #4f46e5, #3730a3);
+            padding: 25px 30px;
+            position: relative;
+        }
+
+        .modal-header h2 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.025em;
+        }
+
+        .modal-header h2 i {
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 12px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .onay-detaylari {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 25px;
+            margin: -10px 0 20px;
+        }
+
+        .onay-detaylari p {
+            color: #4b5563;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .detay-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+
+        .detay-item:hover {
+            background: #f1f5f9;
+            border-radius: 12px;
+        }
+
+        .detay-item.bakiye {
+            background: #eef2ff;
+            border-radius: 16px;
+            margin-top: 12px;
+            border: 2px solid #e0e7ff;
+            padding: 20px;
+        }
+
+        .label {
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+
+        .label i {
+            color: #4f46e5;
+            font-size: 1.2rem;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .value {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .btn-red, .btn-green {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-red {
+            background: #fecaca;
+            color: #dc2626;
+        }
+
+        .btn-green {
+            background: #bbf7d0;
+            color: #16a34a;
+        }
+
+        .btn-red:hover, .btn-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-red:hover {
+            background: #fca5a5;
+        }
+
+        .btn-green:hover {
+            background: #86efac;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        @media (max-width: 640px) {
+            .modal-content {
+                width: 95%;
+                margin: 3vh auto;
+            }
+            
+            .modal-header {
+                padding: 20px;
+            }
+            
+            .modal-body {
+                padding: 20px;
+            }
+            
+            .onay-detaylari {
+                padding: 20px;
+            }
+            
+            .btn-red, .btn-green {
+                padding: 14px;
+            }
+        }
+    </style>
+</body>
+</html>

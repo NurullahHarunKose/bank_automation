@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kullanıcı Bilgileri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            text-align: center;
+        }
+
+        .back-button {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .info-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .section-title {
+            color: #0066cc;
+            font-size: 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+            width: 120px;
+            flex-shrink: 0;
+        }
+
+        .info-separator {
+            color: #0066cc;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .info-separator {
+                display: none;
+            }
+
+            .info-label {
+                color: #0066cc;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Ana Menüye Dön</span>
+            </a>
+            <h1>KULLANICI BİLGİLERİ</h1>
+        </div>
+
+        <div class="info-section">
+            <h2 class="section-title">
+                <i class="fas fa-user"></i>
+                Kişisel Bilgiler
+            </h2>
+            <div class="info-row">
+                <span class="info-label">Ad</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.ad }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Soyad</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.soyad }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">TC Kimlik No</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.tc_no }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Hesap No</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.hesap_no }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Doğum Tarihi</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.dogum_tarihi }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="section-title">
+                <i class="fas fa-phone"></i>
+                İletişim Bilgileri
+            </h2>
+            <div class="info-row">
+                <span class="info-label">Telefon</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.telefon }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">E-posta</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.email }}</span>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 class="section-title">
+                <i class="fas fa-map-marker-alt"></i>
+                Adres Bilgileri
+            </h2>
+            <div class="info-row">
+                <span class="info-label">Adres</span>
+                <span class="info-separator">:</span>
+                <span class="info-value">{{ musteri.adres }}</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

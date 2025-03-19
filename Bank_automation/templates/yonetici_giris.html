@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Yönetici Girişi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <i class="fas fa-user-shield bank-icon"></i>
+                <h1>Yönetici Paneli</h1>
+            </div>
+            <form method="POST" action="{{ url_for('yonetici_login') }}">
+                <div class="form-group">
+                    <label for="sifre">
+                        <i class="fas fa-key"></i>
+                        Yönetici Şifresi:
+                    </label>
+                    <input type="password" id="sifre" name="sifre" required>
+                </div>
+                <button type="submit" class="login-button">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <div class="nav-links">
+                <a href="/" class="musteri-link"><i class="fas fa-home"></i> Ana Sayfa</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

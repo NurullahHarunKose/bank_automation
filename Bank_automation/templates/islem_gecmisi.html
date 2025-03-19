@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>İşlem Geçmişi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="transaction-container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Ana Menüye Dön</span>
+            </a>
+            <h1>İŞLEM GEÇMİŞİ</h1>
+        </div>
+
+        <!-- İşlem Tipi Seçimi -->
+        <div class="transaction-tabs">
+            <button class="tab-btn active" onclick="showTab('transfer')">
+                <i class="fas fa-exchange-alt"></i>
+                Para Transferleri
+            </button>
+            <button class="tab-btn" onclick="showTab('exchange')">
+                <i class="fas fa-coins"></i>
+                Döviz İşlemleri
+            </button>
+        </div>
+
+        <!-- İşlem Geçmişi Kartları -->
+        <div class="transaction-content">
+            <!-- Para Transferleri -->
+            <div id="transfer-tab" class="tab-content active">
+                <div class="transaction-section">
+                    <div class="section-header">
+                        <i class="fas fa-exchange-alt"></i>
+                        <h2>Para Transferleri</h2>
+                    </div>
+                    <div class="transaction-list">
+                        {% set transfer_islemler = islemler|selectattr('islem_tipi', 'equalto', 'Para Transferi')|list %}
+                        {% if transfer_islemler %}
+                            {% for islem in transfer_islemler %}
+                            <div class="transaction-card">
+                                <div class="transaction-icon">
+                                    {% if islem.birim == 'USD' %}
+                                        <i class="fas fa-dollar-sign"></i>
+                                    {% elif islem.birim == 'EUR' %}
+                                        <i class="fas fa-euro-sign"></i>
+                                    {% elif islem.birim == 'TL' %}
+                                        <i class="fas fa-lira-sign"></i>
+                                    {% elif islem.birim == 'ALTIN' %}
+                                        <i class="fas fa-coins gold"></i>
+                                    {% elif islem.birim == 'GUMUS' %}
+                                        <i class="fas fa-coins silver"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="transaction-details">
+                                    <div class="transaction-type">
+                                        {% if 'Transfer' in islem.islem_tipi %}
+                                            {% if islem.hesap_no == session.hesap_no %}
+                                                <i class="fas fa-arrow-up text-danger"></i> Gönderilen {{ islem.birim }} Transferi
+                                            {% else %}
+                                                <i class="fas fa-arrow-down text-success"></i> Gelen {{ islem.birim }} Transferi
+                                            {% endif %}
+                                        {% else %}
+                                            {{ islem.islem_tipi }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="transaction-info">
+                                        <div class="amount-info">
+                                            <span class="amount">{{ islem.miktar }} {{ islem.birim }}</span>
+                                            {% if islem.karsi_hesap %}
+                                                <span class="transfer-detail">
+                                                    {% if islem.hesap_no == session.hesap_no %}
+                                                        <i class="fas fa-user-friends"></i> Alıcı Hesap: {{ islem.karsi_hesap }}
+                                                    {% else %}
+                                                        <i class="fas fa-user-friends"></i> Gönderen Hesap: {{ islem.hesap_no }}
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="transaction-date">
+                                        <i class="far fa-calendar-alt"></i> {{ islem.tarih }}
+                                    </div>
+                                    {% if islem.aciklama %}
+                                        <div class="transaction-desc">
+                                            <i class="fas fa-comment-alt"></i> Açıklama: {{ islem.aciklama }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-transaction">
+                                <i class="fas fa-info-circle"></i>
+                                Para transfer işlemi bulunmamaktadır.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Döviz İşlemleri -->
+            <div id="exchange-tab" class="tab-content">
+                <div class="transaction-section">
+                    <div class="section-header">
+                        <i class="fas fa-coins"></i>
+                        <h2>Döviz İşlemleri</h2>
+                    </div>
+                    <div class="transaction-list">
+                        {% set doviz_islemler = [] %}
+                        {% for islem in islemler %}
+                            {% if 'Döviz İşlemi' in islem.islem_tipi %}
+                                {% set _ = doviz_islemler.append(islem) %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if doviz_islemler %}
+                            {% for islem in doviz_islemler %}
+                            <div class="transaction-card">
+                                <div class="transaction-icon">
+                                    {% if 'USD' in islem.birim %}
+                                        <i class="fas fa-dollar-sign"></i>
+                                    {% elif 'EUR' in islem.birim %}
+                                        <i class="fas fa-euro-sign"></i>
+                                    {% elif 'ALTIN' in islem.birim %}
+                                        <i class="fas fa-coins gold"></i>
+                                    {% elif 'GUMUS' in islem.birim %}
+                                        <i class="fas fa-coins silver"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="transaction-details">
+                                    <div class="transaction-type">{{ islem.islem_tipi }}</div>
+                                    <div class="transaction-info">{{ islem.miktar }} {{ islem.birim }}</div>
+                                    <div class="transaction-date">{{ islem.tarih }}</div>
+                                    <div class="transaction-desc">{{ islem.aciklama }}</div>
+                                    {% if islem.kur %}
+                                    <div class="exchange-rate">İşlem Kuru: {{ "%.4f"|format(islem.kur) }} ₺</div>
+                                    {% endif %}
+                                </div>
+                                <div class="transaction-amount">
+                                    {{ islem.miktar }} {{ islem.birim }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-transaction">
+                                <i class="fas fa-info-circle"></i>
+                                Döviz işlemi bulunmamaktadır.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // Tüm tab içeriklerini gizle
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Tüm tab butonlarından active sınıfını kaldır
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Seçilen tab'ı göster
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Tıklanan butonu aktif yap
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

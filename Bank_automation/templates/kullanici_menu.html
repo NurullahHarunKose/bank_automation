@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Banka Sistemi - Ana Menü</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            margin-bottom: 10px;
+        }
+
+        .user-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .user-info p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            background: #0066cc;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            background: #0052a3;
+        }
+
+        .menu-item a {
+            color: white;
+            text-decoration: none;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item i {
+            font-size: 20px;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .menu-item span {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .logout-item {
+            background: #ff4444;
+        }
+
+        .logout-item:hover {
+            background: #cc0000;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .menu-item {
+                margin-bottom: 10px;
+            }
+
+            .menu-item a {
+                padding: 15px;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            margin: 15% auto;
+            text-align: center;
+        }
+
+        .modal-content i {
+            font-size: 48px;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            background: #0052a3;
+        }
+
+        /* Transfer Modal Stilleri */
+        .transfer-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .transfer-modal-content {
+            position: relative;
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .transfer-success-icon {
+            font-size: 48px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .transfer-title {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .transfer-message {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .transfer-modal-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .transfer-modal-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Yeni Modal Stilleri */
+        .islem-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .islem-modal.active {
+            opacity: 1;
+        }
+
+        .islem-modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .islem-modal.active .islem-modal-content {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .islem-icon {
+            font-size: 60px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .islem-baslik {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .islem-mesaj {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .islem-btn {
+            background: linear-gradient(45deg, #28a745, #34ce57);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+        }
+
+        .islem-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .islem-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Yeni Modern Transfer Modal Stili */
+        .transfer-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .transfer-notification.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        .notification-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-icon {
+            font-size: 48px;
+            color: #10B981;
+            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .notification-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .notification-details {
+            background: rgba(16, 185, 129, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #6B7280;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #1F2937;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .notification-btn {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+            width: 100%;
+        }
+
+        .notification-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .bakiye-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .bakiye-info .detail-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #10B981;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="user-info">
+                <h1>{{ session.ad_soyad }}</h1>
+                <p>Hesap No: {{ session.hesap_no }}</p>
+            </div>
+        </div>
+
+        <!-- Sadece bu bildirim bölümünü tutuyoruz, diğerlerini kaldırıyoruz -->
+        {% if session.get('transfer_sonuc') %}
+        <div id="transferNotification" class="transfer-notification">
+            <div class="notification-content">
+                <i class="fas fa-check-circle notification-icon"></i>
+                <h2 class="notification-title">Transfer Başarılı!</h2>
+                <div class="notification-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Gönderilen Tutar</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.miktar }} {{ session.transfer_sonuc.birim }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Alıcı</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.alici }}</span>
+                    </div>
+                </div>
+                <button onclick="closeNotification()" class="notification-btn">
+                    <i class="fas fa-check"></i> Tamam
+                </button>
+            </div>
+        </div>
+
+        <script>
+            window.onload = function() {
+                const notification = document.getElementById('transferNotification');
+                setTimeout(() => {
+                    notification.classList.add('active');
+                }, 100);
+            };
+
+            function closeNotification() {
+                const notification = document.getElementById('transferNotification');
+                notification.classList.remove('active');
+                notification.addEventListener('transitionend', () => {
+                    notification.style.display = 'none';
+                    // Transfer mesajını temizle ve sayfayı yenileme
+                    fetch('/clear_transfer_message').then(() => {
+                        window.location.reload();
+                    });
+                });
+            }
+        </script>
+        {% endif %}
+
+        <!-- Döviz/Emtia işlem bildirimi -->
+        {% if session.get('transfer_sonuc') and session.transfer_sonuc.get('islem_turu') %}
+        <div id="transferNotification" class="transfer-notification">
+            <div class="notification-content">
+                <i class="fas fa-check-circle notification-icon"></i>
+                <h2 class="notification-title">{{ session.transfer_sonuc.birim }} {{ session.transfer_sonuc.islem_turu }} İşlemi Başarılı!</h2>
+                <div class="notification-details">
+                    <div class="detail-item">
+                        <span class="detail-label">İşlem Türü</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.islem_turu }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">{{ session.transfer_sonuc.birim }} Miktarı</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.miktar }} {{ session.transfer_sonuc.birim }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">İşlem Kuru</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.kur }} ₺</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Toplam Tutar</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.toplam_tl }} ₺</span>
+                    </div>
+                    <div class="detail-item bakiye-info">
+                        <span class="detail-label">Güncel {{ session.transfer_sonuc.birim }} Bakiyeniz</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.yeni_bakiye }} {{ session.transfer_sonuc.birim }}</span>
+                    </div>
+                    <div class="detail-item bakiye-info">
+                        <span class="detail-label">Güncel TL Bakiyeniz</span>
+                        <span class="detail-value">{{ session.transfer_sonuc.yeni_tl_bakiye }} ₺</span>
+                    </div>
+                </div>
+                <button onclick="closeNotification()" class="notification-btn">
+                    <i class="fas fa-check"></i> Tamam
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Döviz işlem bildirimi -->
+        {% if session.get('doviz_islem_sonuc') %}
+        <div id="dovizIslemNotification" class="transfer-notification active">
+            <div class="notification-content">
+                <i class="fas fa-check-circle notification-icon"></i>
+                <h2 class="notification-title">{{ session.doviz_islem_sonuc.birim }} {{ session.doviz_islem_sonuc.islem_turu }} İşlemi Başarılı!</h2>
+                <div class="notification-details">
+                    <div class="detail-item">
+                        <span class="detail-label">İşlem Türü</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.islem_turu }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">{{ session.doviz_islem_sonuc.birim }} Miktarı</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.miktar }} {{ session.doviz_islem_sonuc.birim }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">İşlem Kuru</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.kur }} ₺</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Toplam Tutar</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.toplam_tl }} ₺</span>
+                    </div>
+                    <div class="detail-item bakiye-info">
+                        <span class="detail-label">Güncel {{ session.doviz_islem_sonuc.birim }} Bakiyeniz</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.yeni_bakiye }} {{ session.doviz_islem_sonuc.birim }}</span>
+                    </div>
+                    <div class="detail-item bakiye-info">
+                        <span class="detail-label">Güncel TL Bakiyeniz</span>
+                        <span class="detail-value">{{ session.doviz_islem_sonuc.yeni_tl_bakiye }} ₺</span>
+                    </div>
+                </div>
+                <button onclick="closeDovizNotification()" class="notification-btn">
+                    <i class="fas fa-check"></i> Tamam
+                </button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const notification = document.getElementById('dovizIslemNotification');
+                if (notification) {
+                    setTimeout(() => {
+                        notification.classList.add('active');
+                    }, 100);
+                }
+            });
+
+            function closeDovizNotification() {
+                const notification = document.getElementById('dovizIslemNotification');
+                notification.classList.remove('active');
+                
+                fetch('/clear_doviz_message').then(() => {
+                    notification.style.display = 'none';
+                });
+            }
+        </script>
+        {% endif %}
+
+        <nav class="menu-list">
+            <div class="menu-item">
+                <a href="{{ url_for('kullanici_bilgileri') }}"> <!-- Düzeltildi: Fazla kapanan </a> etiketi kaldırıldı -->
+                    <i class="fas fa-user"></i>
+                    <span>Kullanıcı Bilgileri</span>
+                </a>
+            </div>
+
+            <div class="menu-item">
+                <a href="{{ url_for('hesap_bilgileri') }}">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Hesap Bilgileri</span>
+                </a>
+            </div>
+
+            <div class="menu-item">
+                <a href="{{ url_for('para_transferi') }}">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Para Transferi</span>
+                </a>
+            </div>
+
+            <div class="menu-item">
+                <a href="{{ url_for('doviz_bilgileri') }}">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Güncel Döviz ve Emtia Bilgileri</span>
+                </a>
+            </div>
+
+            <div class="menu-item">
+                <a href="{{ url_for('doviz_islem') }}" class="menu-item">
+                    <i class="fas fa-coins"></i>
+                    <span class="menu-text">Döviz ve Kıymetli Maden İşlemleri</span>
+                </a>
+            </div>
+
+            <div class="menu-item">
+                <a href="{{ url_for('islem_gecmisi') }}">
+                    <i class="fas fa-history"></i>
+                    <span>İşlem Geçmişi</span>
+                </a>
+            </div>
+
+            <div class="menu-item logout-item">
+                <a href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Çıkış Yap</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+</body>
+</html>

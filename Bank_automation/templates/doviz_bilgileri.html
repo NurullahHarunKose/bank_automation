@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Güncel Döviz ve Emtia Kurları</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="kur-container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Ana Menüye Dön</span>
+            </a>
+            <h1>DÖVİZ VE EMTİA KURLARI</h1>
+        </div>
+
+        <div class="kur-info-section">
+            <!-- Son güncelleme zamanı -->
+            <div class="kur-row update-time">
+                <span class="kur-label">
+                    <i class="fas fa-clock currency-icon clock-icon"></i>
+                    Son Güncelleme
+                </span>
+                <span class="kur-separator">:</span>
+                <span class="kur-value">{{ guncelleme }}</span>
+            </div>
+
+            <!-- Kur tablosu başlığı -->
+            <div class="kur-table-header">
+                <div class="kur-name">Döviz/Emtia</div>
+                <div class="kur-rates">
+                    <div class="rate-buy">Alış</div>
+                    <div class="rate-sell">Satış</div>
+                </div>
+            </div>
+
+            <!-- Döviz kurları -->
+            <div class="kur-row">
+                <span class="kur-label">
+                    <i class="fas fa-dollar-sign currency-icon usd-icon"></i>
+                    Amerikan Doları
+                </span>
+                <div class="kur-rates">
+                    <span class="rate-buy">{{ "%.4f"|format(kurlar.USD.alis) }} ₺</span>
+                    <span class="rate-sell">{{ "%.4f"|format(kurlar.USD.satis) }} ₺</span>
+                </div>
+            </div>
+
+            <div class="kur-row">
+                <span class="kur-label">
+                    <i class="fas fa-euro-sign currency-icon eur-icon"></i>
+                    Euro
+                </span>
+                <div class="kur-rates">
+                    <span class="rate-buy">{{ "%.4f"|format(kurlar.EUR.alis) }} ₺</span>
+                    <span class="rate-sell">{{ "%.4f"|format(kurlar.EUR.satis) }} ₺</span>
+                </div>
+            </div>
+
+            <!-- Emtia kurları -->
+            <div class="kur-row">
+                <span class="kur-label">
+                    <i class="fas fa-coins currency-icon gold-icon"></i>
+                    Gram Altın
+                </span>
+                <div class="kur-rates">
+                    <span class="rate-buy">{{ "%.4f"|format(kurlar.ALTIN.alis) }} ₺</span>
+                    <span class="rate-sell">{{ "%.4f"|format(kurlar.ALTIN.satis) }} ₺</span>
+                </div>
+            </div>
+
+            <div class="kur-row">
+                <span class="kur-label">
+                    <i class="fas fa-coins currency-icon silver-icon"></i>
+                    Gram Gümüş
+                </span>
+                <div class="kur-rates">
+                    <span class="rate-buy">{{ "%.4f"|format(kurlar.GUMUS.alis) }} ₺</span>
+                    <span class="rate-sell">{{ "%.4f"|format(kurlar.GUMUS.satis) }} ₺</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setTimeout(function() {
+            window.location.reload();
+        }, 300000);
+    </script>
+</body>
+</html>

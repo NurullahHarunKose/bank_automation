@@ -1,0 +1,59 @@
+{
+    "musteriler": [
+        {
+            "ad": "Mehmet",
+            "soyad": "Öz",
+            "tc_no": "10045064785",
+            "dogum_tarihi": "2001-02-01",
+            "sifre": "1234",
+            "telefon": "5511247854",
+            "email": "mehmet_oz@gmail.com",
+            "adres": "Yıldırım/Bursa",
+            "hesap_no": "1000"
+        },
+        {
+            "ad": "Ahmet",
+            "soyad": "Yalçın",
+            "tc_no": "10045267812",
+            "dogum_tarihi": "1997-05-01",
+            "sifre": "1234",
+            "telefon": "5511247854",
+            "email": "mehmet@hotmail.com",
+            "adres": "Altındağ/Ankara",
+            "hesap_no": "1001"
+        },
+        {
+            "ad": "Yusuf",
+            "soyad": "Aktaş",
+            "tc_no": "10045875478",
+            "dogum_tarihi": "1987-05-01",
+            "sifre": "1234",
+            "telefon": "5511247895",
+            "email": "yusuf@hotmail.com",
+            "adres": "İnegöl/Bursa",
+            "hesap_no": "1002"
+        },
+        {
+            "ad": "Berat",
+            "soyad": "Dinç",
+            "tc_no": "45015478954",
+            "dogum_tarihi": "1995-04-08",
+            "sifre": "1234",
+            "telefon": "5511247854",
+            "email": "Berat_Dinc@gmail.com",
+            "adres": "Yenimahalle/Ankara",
+            "hesap_no": "1003"
+        },
+        {
+            "ad": "Emrullah",
+            "soyad": "Gökçe",
+            "tc_no": "45215894561",
+            "dogum_tarihi": "1965-08-05",
+            "sifre": "1234",
+            "telefon": "5511204785",
+            "email": "emrullah@gmail.com",
+            "adres": "Avusturya",
+            "hesap_no": "1004"
+        }
+    ]
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Döviz İşlemleri</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="kur-container">
+        <!-- Header -->
+        <div class="header">
+            <a href="{{ url_for('kullanici_menu') }}" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                <span>Geri Dön</span>
+            </a>
+            <h1>DÖVİZ VE KIYMETLİ MADEN İŞLEMLERİ</h1>
+        </div>
+
+        <!-- Son Güncelleme Bilgisi -->
+        <div class="update-info">
+            <i class="fas fa-clock"></i>
+            <span>Son Güncelleme: {{ datetime.now().strftime("%H:%M:%S") }}</span>
+            <button onclick="window.location.reload()" class="refresh-btn">
+                <i class="fas fa-sync-alt"></i>
+                Yenile
+            </button>
+        </div>
+
+        <!-- Kur Kartları -->
+        <div class="currency-select-grid">
+            <!-- USD Kartı -->
+            <div class="currency-select-card">
+                <div class="card-header usd">
+                    <i class="fas fa-dollar-sign"></i>
+                    <div class="header-text">
+                        <h3>Amerikan Doları</h3>
+                        <span class="currency-code">USD</span>
+                    </div>
+                </div>
+                <div class="card-rates">
+                    <div class="rate-row">
+                        <div class="rate-item">
+                            <span class="rate-label">Alış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.USD.alis) }} ₺</span>
+                        </div>
+                        <div class="rate-item">
+                            <span class="rate-label">Satış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.USD.satis) }} ₺</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('doviz_islem_yap', birim='USD', islem_turu='alis') }}" class="action-btn buy">
+                        <i class="fas fa-arrow-down"></i> Dolar Al
+                    </a>
+                    <a href="{{ url_for('doviz_islem_yap', birim='USD', islem_turu='satis') }}" class="action-btn sell">
+                        <i class="fas fa-arrow-up"></i> Dolar Sat
+                    </a>
+                </div>
+            </div>
+
+            <!-- EUR Kartı -->
+            <div class="currency-select-card">
+                <div class="card-header eur">
+                    <i class="fas fa-euro-sign"></i>
+                    <div class="header-text">
+                        <h3>Euro</h3>
+                        <span class="currency-code">EUR</span>
+                    </div>
+                </div>
+                <div class="card-rates">
+                    <div class="rate-row">
+                        <div class="rate-item">
+                            <span class="rate-label">Alış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.EUR.alis) }} ₺</span>
+                        </div>
+                        <div class="rate-item">
+                            <span class="rate-label">Satış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.EUR.satis) }} ₺</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="/doviz-islem-detay/EUR/alis" class="action-btn buy">
+                        <i class="fas fa-arrow-down"></i> Euro Al
+                    </a>
+                    <a href="/doviz-islem-detay/EUR/satis" class="action-btn sell">
+                        <i class="fas fa-arrow-up"></i> Euro Sat
+                    </a>
+                </div>
+            </div>
+
+            <!-- Altın Kartı -->
+            <div class="currency-select-card">
+                <div class="card-header gold">
+                    <i class="fas fa-coins"></i>
+                    <div class="header-text">
+                        <h3>Gram Altın</h3>
+                        <span class="currency-code">XAU</span>
+                    </div>
+                </div>
+                <div class="card-rates">
+                    <div class="rate-row">
+                        <div class="rate-item">
+                            <span class="rate-label">Alış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.ALTIN.alis) }} ₺</span>
+                        </div>
+                        <div class="rate-item">
+                            <span class="rate-label">Satış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.ALTIN.satis) }} ₺</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('doviz_islem_yap', birim='ALTIN', islem_turu='alis') }}" class="action-btn buy">
+                        <i class="fas fa-arrow-down"></i> Altın Al
+                    </a>
+                    <a href="{{ url_for('doviz_islem_yap', birim='ALTIN', islem_turu='satis') }}" class="action-btn sell">
+                        <i class="fas fa-arrow-up"></i> Altın Sat
+                    </a>
+                </div>
+            </div>
+
+            <!-- Gümüş Kartı -->
+            <div class="currency-select-card">
+                <div class="card-header silver">
+                    <i class="fas fa-coins"></i>
+                    <div class="header-text">
+                        <h3>Gram Gümüş</h3>
+                        <span class="currency-code">XAG</span>
+                    </div>
+                </div>
+                <div class="card-rates">
+                    <div class="rate-row">
+                        <div class="rate-item">
+                            <span class="rate-label">Alış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.GUMUS.alis) }} ₺</span>
+                        </div>
+                        <div class="rate-item">
+                            <span class="rate-label">Satış</span>
+                            <span class="rate-value">{{ "%.4f"|format(kurlar.GUMUS.satis) }} ₺</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('doviz_islem_yap', birim='GUMUS', islem_turu='alis') }}" class="action-btn buy">
+                        <i class="fas fa-arrow-down"></i> Gümüş Al
+                    </a>
+                    <a href="{{ url_for('doviz_islem_yap', birim='GUMUS', islem_turu='satis') }}" class="action-btn sell">
+                        <i class="fas fa-arrow-up"></i> Gümüş Sat
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bilgi Mesajı -->
+        <div class="info-message">
+            <i class="fas fa-info-circle"></i>
+            <p>Döviz kurları anlık olarak güncellenmektedir. İşlem yapmadan önce kurları kontrol ediniz.</p>
+        </div>
+    </div>
+</body>
+</html>
